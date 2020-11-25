@@ -2,18 +2,21 @@ import React, { useState, Fragment } from "react";
 
 import TodoItem from "./TodoItem";
 import TodoFilters from "./TodoFilters";
-import { gql, useQuery } from '@apollo/client';
-
+import { gql, useQuery } from "@apollo/client";
 
 const GET_MY_TODOS = gql`
   query getMyTodos {
-    todos(where: { is_public: { _eq: false} }, order_by: { created_at: desc }) {
+    todos(
+      where: { is_public: { _eq: false } }
+      order_by: { created_at: desc }
+    ) {
       id
       title
       created_at
       is_completed
+    }
   }
-}`;
+`;
 
 const TodoPrivateList = props => {
   const [state, setState] = useState({
@@ -30,7 +33,8 @@ const TodoPrivateList = props => {
 
   const clearCompleted = () => {};
 
-  const {todos} = props;
+  // eslint-disable-next-line react/prop-types
+  const { todos } = props;
   let filteredTodos = todos;
   if (state.filter === "active") {
     filteredTodos = todos.filter(todo => todo.is_completed !== true);
@@ -63,17 +67,17 @@ const TodoPrivateList = props => {
 const TodoPrivateListQuery = () => {
   const { loading, error, data } = useQuery(GET_MY_TODOS);
 
-  if(loading) {
-    return <div>Loading</div>
+  if (loading) {
+    return <div>Loading</div>;
   }
 
-  if(error) {
+  if (error) {
     console.error(error);
-    return <div>Error!</div>
+    return <div>Error!</div>;
   }
 
-  return <TodoPrivateList todos={data.todos} />
-}
+  return <TodoPrivateList todos={data.todos} />;
+};
 
 export default TodoPrivateListQuery;
-export {GET_MY_TODOS};
+export { GET_MY_TODOS };
