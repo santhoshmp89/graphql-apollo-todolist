@@ -21,10 +21,7 @@ const ADD_TODO = gql`
 
 // eslint-disable-next-line no-unused-vars
 const TodoInput = ({ isPublic = false }) => {
-  const [addTodo] = useMutation(ADD_TODO, {
-    update: updateCache,
-    onCompleted: resetInput
-  });
+  const [addTodo] = useMutation(ADD_TODO);
   const [inputTodo, setInputTodo] = useState("");
   const resetInput = () => {
     setInputTodo("");
@@ -49,8 +46,12 @@ const TodoInput = ({ isPublic = false }) => {
       className="formInput"
       onSubmit={e => {
         e.preventDefault();
-        addTodo({variables: {todo: inputTodo, isPublic}});
-        resetInput();
+        addTodo({
+          variables: {todo: inputTodo, isPublic},
+          // optimisticResponse: true,
+          update: updateCache,
+          onCompleted: resetInput
+        });
       }}
     >
       <input className="input" placeholder="What needs to be done?" value={inputTodo} onChange={(e) => setInputTodo(e.target.value)}  />
