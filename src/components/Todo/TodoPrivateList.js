@@ -2,7 +2,7 @@ import React, { useState, Fragment } from "react";
 
 import TodoItem from "./TodoItem";
 import TodoFilters from "./TodoFilters";
-import { gql, useQuery } from "@apollo/client";
+import { gql, useMutation, useQuery } from "@apollo/client";
 
 const GET_MY_TODOS = gql`
   query getMyTodos {
@@ -14,6 +14,16 @@ const GET_MY_TODOS = gql`
       title
       created_at
       is_completed
+    }
+  }
+`;
+
+const CLEAR_TODOS = gql`
+  mutation clearTodo {
+    delete_todos(
+      where: { is_completed: { _eq: true }, is_public: { _eq: false } }
+    ) {
+      affected_rows
     }
   }
 `;
@@ -31,7 +41,18 @@ const TodoPrivateList = props => {
     });
   };
 
-  const clearCompleted = () => {};
+  const [clearTodosMutation] = useMutation(CLEAR_TODOS);
+
+  const clearCompleted = () => {
+    clearTodosMutation({
+      optimisticResponse: true,
+      update: cache => {
+        const existingTodos = cache.readQuery({ query: GET_MY_TODOS });
+        const newTodos = existingTodos.todos.filter(t => !t.is_completed);
+        cache.writeQuery({ query: GET_MY_TODOS, data: { todos: newTodos } });
+      }
+    });
+  };
 
   // eslint-disable-next-line react/prop-types
   const { todos } = props;
